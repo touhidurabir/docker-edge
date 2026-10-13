@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+  <dict>
+    <key>Label</key>
+    <string>local.edge-forward-80</string>
+    <key>RunAtLoad</key>
+    <true/>
+    <key>KeepAlive</key>
+    <true/>
+    <key>ProgramArguments</key>
+    <array>
+      <string>/usr/local/bin/socat</string>
+      <string>TCP-LISTEN:80,bind=127.0.0.2,reuseaddr,fork</string>
+      <string>TCP:127.0.0.2:18080</string>
+    </array>
+    <key>StandardErrorPath</key>
+    <string>/var/log/local.edge-forward-80.log</string>
+  </dict>
+</plist>

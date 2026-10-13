@@ -1,0 +1,38 @@
+# Shared HTTPS front door for every Docker project on this Mac. Guide: README.md
+# The browser reaches 127.0.0.2:80/443; root socat daemons (mac/) forward them to 18080/18443 here.
+name: docker-edge
+
+services:
+  traefik:
+    image: traefik:v3.7.14@sha256:575fa15b135078fe5e50aa847987d96dbddd7b093c172429618404df73f3fa7c
+    command:
+      - --entrypoints.web.address=:80
+      - --entrypoints.web.http.aliasHeadersStrategy=delete # drop X_Forwarded_Proto-style lookalikes (PHP reads them as X-Forwarded-Proto)
+      - --entrypoints.web.http.redirections.entrypoint.to=websecure
+      - --entrypoints.web.http.redirections.entrypoint.scheme=https
+      - --entrypoints.websecure.address=:443
+      - --entrypoints.websecure.http.aliasHeadersStrategy=delete
+      - --entrypoints.websecure.http.tls=true
+      - --providers.docker=true
+      - --providers.docker.exposedbydefault=false # only containers labelled traefik.enable=true
+      - --providers.docker.network=edge
+      - --providers.file.directory=/etc/traefik/dynamic
+      - --providers.file.watch=true
+      - --api.insecure=true # dashboard on :8080, published only on 127.0.0.2
+      - --accesslog=true
+      - --log.level=INFO
+    ports:
+      - "127.0.0.2:18080:80"
+      - "127.0.0.2:18443:443"
+      - "127.0.0.2:18090:8080"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./dynamic:/etc/traefik/dynamic:ro
+      - ./certs:/certs:ro
+    networks:
+      - edge
+    restart: unless-stopped
+
+networks:
+  edge:
+    name: edge # fixed name: projects join it with `external: true`

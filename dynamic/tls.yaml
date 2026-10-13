@@ -1,0 +1,5 @@
+# One entry per project. Traefik picks the certificate by host name (SNI). Watched: no restart needed.
+tls:
+  certificates:
+    - certFile: /certs/tenancey.test.pem
+      keyFile: /certs/tenancey.test-key.pem
